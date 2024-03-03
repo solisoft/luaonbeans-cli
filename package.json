@@ -1,0 +1,20 @@
+{
+  "name": "luaonbeans-cli",
+  "version": "1.0.0",
+  "description": "beans - Lua On Beans cli",
+  "main": "index.js",
+  "bin": {
+    "beans": "./bin/beans"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "colors": "^1.4.0",
+    "lodash": "^4.17.21",
+    "yargs": "^17.7.2"
+  }
+}
