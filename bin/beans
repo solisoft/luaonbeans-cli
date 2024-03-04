@@ -91,7 +91,11 @@ if (argv.w) {
       console.log(
         ("Cloning repository using git into " + args[1] + "...").bgBlue,
       );
-      exec("git clone https://github.com/solisoft/luaonbeans.git " + args[1]);
+      exec(
+        "git clone --depth=1 https://github.com/solisoft/luaonbeans.git " +
+          args[1],
+      );
+      exec("rm -Rf" + args[1] + "/.git");
       exec(
         "cp " +
           args[1] +
