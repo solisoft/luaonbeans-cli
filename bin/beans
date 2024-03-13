@@ -33,6 +33,7 @@ const run_specs = () => {
   exec("./luaonbeans.org -i beans specs", (error, stdout, stderr) => {
     if (error) {
       console.log("Specs failed !".red)
+      console.log(stdout)
     } else {
       console.log("Specs passed successfully!".green);
     }
