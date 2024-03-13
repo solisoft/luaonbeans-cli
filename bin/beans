@@ -37,9 +37,6 @@ const run_specs = () => {
         title: "LuaOnBeans :: Error",
         message: "Specs failed",
       });
-      console.log(error);
-      console.log(stdout);
-      console.log(stderr);
     } else {
       console.log("Specs passed successfully!".green);
     }
@@ -93,15 +90,15 @@ if (argv.w) {
       );
       exec(
         "git clone --depth=1 https://github.com/solisoft/luaonbeans.git " +
-          args[1],
+        args[1],
       );
       exec("rm -Rf" + args[1] + "/.git");
       exec(
         "cp " +
-          args[1] +
-          "/config/database.json.sample " +
-          args[1] +
-          "/config/database.json",
+        args[1] +
+        "/config/database.json.sample " +
+        args[1] +
+        "/config/database.json",
       );
     }
   } else if (args[0] == "build") {
@@ -113,14 +110,21 @@ if (argv.w) {
     execSync("zip -r build.org specs");
     execSync("zip -r build.org migrations");
     execSync("zip -r build.org config");
+  } else if (args[0] == "update") {
+    console.log(
+      ("Cloning repository using git into " + args[1] + "...").bgBlue,
+    );
+    exec(
+      "git clone --depth=1 https://github.com/solisoft/luaonbeans.git " +
+      "_update",
+    );
+    exec("cp -Rf _update/.lua/* .lua")
+    exec("cp -Rf _update/.templates/* .lua")
+    exec("rm -Rf _update")
   } else {
     exec(
       "./luaonbeans.org -i beans " + args.join(" "),
-      (error, stdout, stderr) => {
-        console.log(error);
-        console.log(stdout);
-        console.log(stderr);
-      },
+      (error, stdout, stderr) => {},
     );
   }
 }
