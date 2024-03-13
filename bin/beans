@@ -111,16 +111,16 @@ if (argv.w) {
     execSync("zip -r build.org migrations");
     execSync("zip -r build.org config");
   } else if (args[0] == "update") {
-    console.log(
-      ("Cloning repository using git into " + args[1] + "...").bgBlue,
-    );
+    console.log("🐳 Updating luaonbeans...");
     exec(
       "git clone --depth=1 https://github.com/solisoft/luaonbeans.git " +
       "_update",
     );
-    exec("cp -Rf _update/.lua/* .lua")
-    exec("cp -Rf _update/.templates/* .lua")
-    exec("rm -Rf _update")
+    console.log("📦 copying .lua/* files");
+    exec("cp -Rvf _update/.lua/* .lua")
+    exec("cp -Rvf _update/.templates/* .lua")
+    exec("rm -Rvf _update")
+    console.log("✅ Updated!");
   } else {
     exec(
       "./luaonbeans.org -i beans " + args.join(" "),
