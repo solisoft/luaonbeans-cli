@@ -120,9 +120,8 @@ if (argv.w) {
     execSync("rm -Rvf _update")
     console.log("✅ Updated!");
   } else {
-    execSync(
-      "./luaonbeans.org -i beans " + args.join(" "),
-      (error, stdout, stderr) => {}
-    );
+    console.log(execSync(
+      "./luaonbeans.org -i beans.lua " + args.join(" ")
+    ).toString());
   }
 }
