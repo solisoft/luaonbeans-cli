@@ -1,32 +1,32 @@
 #!/usr/bin/env node
 /*jshint -W097, -W033, node: true, esversion: 6 */
-"use strict";
+"use strict"
 
-var argv = require("yargs").argv;
-var colors = require("colors");
-var _ = require("lodash");
-var chokidar = require("chokidar");
+var argv = require("yargs").argv
+var colors = require("colors")
+var _ = require("lodash")
+var chokidar = require("chokidar")
 
-const fs = require("fs");
-const path = require("path");
-const { exec, execSync } = require("child_process");
+const fs = require("fs")
+const path = require("path")
+const { exec, execSync } = require("child_process")
 
-var dirname = process.cwd();
+var dirname = process.cwd()
 
 function findFilesInDir(startPath, filter) {
-  var results = [];
+  var results = []
 
-  var files = fs.readdirSync(startPath);
+  var files = fs.readdirSync(startPath)
   for (var i = 0; i < files.length; i++) {
-    var filename = path.join(startPath, files[i]);
-    var stat = fs.lstatSync(filename);
+    var filename = path.join(startPath, files[i])
+    var stat = fs.lstatSync(filename)
     if (stat.isDirectory()) {
-      results = results.concat(findFilesInDir(filename, filter)); //recurse
+      results = results.concat(findFilesInDir(filename, filter)) //recurse
     } else if (filename.indexOf(filter) >= 0) {
-      results.push(filename);
+      results.push(filename)
     }
   }
-  return results;
+  return results
 }
 
 const run_specs = () => {
@@ -35,23 +35,23 @@ const run_specs = () => {
       console.log("Specs failed !".red)
       console.log(stdout)
     } else {
-      console.log("Specs passed successfully!".green);
+      console.log("Specs passed successfully!".green)
     }
   });
 };
 
 if (argv.w) {
   // Running specs
-  run_specs();
+  run_specs()
 
   // tailwindcss
-  console.log("Searching for tailwind css files ...");
+  console.log("Searching for tailwind css files ...")
 
-  let tw_files = findFilesInDir("app", "_tw_src");
-  console.log(tw_files);
+  let tw_files = findFilesInDir("app", "_tw_src")
+  console.log(tw_files)
 
   _.each(tw_files, (file) => {
-    var path = file.split("/");
+    var path = file.split("/")
     path.splice(-1);
     exec(
       "tailwind -i " +
@@ -60,18 +60,18 @@ if (argv.w) {
         _.last(path) +
         ".css -w -m -c " +
         path.join("/") +
-        "/tailwind.config.js",
+        "/tailwind.config.js"
     );
   });
 
-  console.log("Watching folder.", dirname);
+  console.log("Watching folder.", dirname)
 
   chokidar
     .watch(dirname, { ignored: /(^|[\/\\])\../ })
     .on("all", (event, path) => {
       if (event == "change") {
-        console.log("change : ", path);
-        run_specs();
+        console.log("change : ", path)
+        run_specs()
       }
     });
 } else {
@@ -82,21 +82,21 @@ if (argv.w) {
       console.log("ERROR".red);
       console.log("syntax : beans new myproject".yellow);
     } else {
-      console.log(
-        ("Cloning repository using git into " + args[1] + "...").bgBlue,
-      );
-      exec(
+      process.stdout.write("📦 ");
+      execSync(
         "git clone --depth=1 https://github.com/solisoft/luaonbeans.git " +
-        args[1],
+        args[1]
       );
-      exec("rm -Rf" + args[1] + "/.git");
-      exec(
+      execSync("rm -Rf " + args[1] + "/.git");
+      execSync(
         "cp " +
         args[1] +
         "/config/database.json.sample " +
         args[1] +
-        "/config/database.json",
+        "/config/database.json"
       );
+      console.log("✅ Project created !")
+      execSync("cd " + args[1])
     }
   } else if (args[0] == "build") {
     execSync("cp luaonbeans.org build.org");
@@ -109,19 +109,20 @@ if (argv.w) {
     execSync("zip -r build.org config");
   } else if (args[0] == "update") {
     console.log("🐳 Updating luaonbeans...");
-    exec(
+    process.stdout.write("📦 ");
+    execSync(
       "git clone --depth=1 https://github.com/solisoft/luaonbeans.git " +
-      "_update",
+      "_update"
     );
     console.log("📦 copying .lua/* files");
-    exec("cp -Rvf _update/.lua/* .lua")
-    exec("cp -Rvf _update/.templates/* .lua")
-    exec("rm -Rvf _update")
+    execSync("cp -Rvf _update/.lua/* .lua")
+    execSync("cp -Rvf _update/.templates/* .lua")
+    execSync("rm -Rvf _update")
     console.log("✅ Updated!");
   } else {
-    exec(
+    execSync(
       "./luaonbeans.org -i beans " + args.join(" "),
-      (error, stdout, stderr) => {},
+      (error, stdout, stderr) => {}
     );
   }
 }
