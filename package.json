@@ -1,6 +1,6 @@
 {
   "name": "luaonbeans-cli",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "beans - Lua On Beans cli",
   "main": "index.js",
   "bin": {
