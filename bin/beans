@@ -111,6 +111,7 @@ if (argv.w) {
     execSync("zip -r build.org specs");
     execSync("zip -r build.org migrations");
     execSync("zip -r build.org config");
+    console.log("📦 build.org built successfully!");
   } else if (args[0] == "update") {
     console.log("🐳 Updating luaonbeans...");
     process.stdout.write("📦 ");
