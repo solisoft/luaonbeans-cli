@@ -33,9 +33,9 @@ const run_specs = () => {
   exec("./luaonbeans.org -i beans.lua specs", (error, stdout, stderr) => {
     if (error) {
       console.log("Specs failed !".red);
-      console.log(error);
-      console.log(stdout);
-      console.log(stderr);
+      console.log(error.toString());
+      //console.log(stdout.toString());
+      //console.log(stderr.toString());
     } else {
       console.log("Specs passed successfully!".green);
     }
@@ -97,8 +97,8 @@ if (argv.w) {
           args[1] +
           "/config/database.json",
       );
-      execSync("rm -Rf " + args[1] + "/docs")
-      execSync("rm -Rf " + args[1] + "/.github")
+      execSync("rm -Rf " + args[1] + "/docs");
+      execSync("rm -Rf " + args[1] + "/.github");
       console.log("✅ Project created !");
       execSync("cd " + args[1] + " && git init");
     }
