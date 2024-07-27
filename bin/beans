@@ -45,7 +45,7 @@ const run_specs = () => {
 
 if (argv.w) {
   // Running specs
-  run_specs();
+  if (argv.t) run_specs();
 
   // tailwindcss
   console.log("Searching for tailwind css files ...");
@@ -57,7 +57,7 @@ if (argv.w) {
     var path = file.split("/");
     path.splice(-1);
     exec(
-      "tailwind -i " +
+      "npx tailwind -i " +
         file +
         " -o public/" +
         _.last(path) +
@@ -74,7 +74,7 @@ if (argv.w) {
     .on("all", (event, path) => {
       if (event == "change") {
         console.log("change : ", path);
-        run_specs();
+        if (argv.t) run_specs();
       }
     });
 } else {
