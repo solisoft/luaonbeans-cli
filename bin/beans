@@ -37,6 +37,7 @@ const run_specs = () => {
       //console.log(stdout.toString());
       //console.log(stderr.toString());
     } else {
+      console.log(stdout.toString());
       console.log("Specs passed successfully!".green);
     }
   });
@@ -124,9 +125,10 @@ if (argv.w) {
     execSync("cp -Rvf _update/.templates/* .lua");
     execSync("rm -Rvf _update");
     console.log("✅ Updated!");
+  } else if (args[0] == "specs") {
+    console.log("running specs");
+    run_specs();
   } else {
-    console.log(
-      execSync("./luaonbeans.org -i beans.lua " + args.join(" ")).toString(),
-    );
+    execSync("./luaonbeans.org -i beans.lua " + args.join(" "));
   }
 }
