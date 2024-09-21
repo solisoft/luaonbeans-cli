@@ -19,10 +19,10 @@ const module_bin_folder = __dirname.replace(/\/bin$/, '/node_modules/.bin')
 function findFilesInDir(startPath, filter) {
   var results = [];
 
-  var files = fs.readdirSync(startPath);
-  for (var i = 0; i < files.length; i++) {
-    var filename = path.join(startPath, files[i]);
-    var stat = fs.lstatSync(filename);
+  const files = fs.readdirSync(startPath);
+  for (let i = 0; i < files.length; i++) {
+    const filename = path.join(startPath, files[i]);
+    const stat = fs.lstatSync(filename);
     if (stat.isDirectory()) {
       results = results.concat(findFilesInDir(filename, filter)); //recurse
     } else if (filename.indexOf(filter) >= 0) {
@@ -72,7 +72,6 @@ if (argv.w) {
   });
 
   //console.log("Watching folder.", dirname);
-
   chokidar
     .watch(dirname, { ignored: /(^|[\/\\])\../ })
     .on("all", (event, path) => {
@@ -151,6 +150,7 @@ if (argv.w) {
         "_update",
     );
     console.log("📦 copying .lua/* files");
+    execSync("cp _update/luaonbeans.org .");
     execSync("cp -Rvf _update/.lua/* .lua");
     execSync("cp -Rvf _update/.templates/* .lua");
     execSync("rm -Rvf _update");
