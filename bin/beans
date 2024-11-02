@@ -95,7 +95,7 @@ if (argv.w) {
                 // keep HTML comments
                 comments: false
               })
-
+              fs.mkdirSync("./public/" + path.replace(currentPath, "").split("/").slice(0, -1).join("/"), { recursive: true })
               fs.writeFileSync("./public/" + path.replace(currentPath, "") + ".js", code)
               console.log(_.last(path.split("/")).yellow + " compiled".green)
             } catch (err) {
@@ -123,7 +123,7 @@ if (argv.w) {
       execSync(
         "cp " +
           args[1] +
-          "/config/database.json.sample " +
+          "/config/database.json.arangodb.sample " +
           args[1] +
           "/config/database.json",
       );
@@ -146,18 +146,136 @@ if (argv.w) {
     console.log("🐳 Updating luaonbeans...");
     process.stdout.write("📦 ");
     execSync(
-      "git clone --depth=1 https://github.com/solisoft/luaonbeans.git " +
-        "_update",
+      "git clone --depth=1 https://github.com/solisoft/luaonbeans.git _update",
     );
     console.log("📦 copying .lua/* files");
     execSync("cp _update/luaonbeans.org .");
     execSync("cp -Rvf _update/.lua/* .lua");
-    execSync("cp -Rvf _update/.templates/* .lua");
+    execSync("cp -Rvf _update/.templates/* .templates");
     execSync("rm -Rvf _update");
     console.log("✅ Updated!");
   } else if (args[0] == "specs") {
     console.log("running specs");
     run_specs();
+  } else if (args[0] == "swagger") {
+    const glob = require("glob");
+    const path = require("path");
+
+    const files = glob.sync("app/controllers/**/*.lua");
+
+    let openapi_doc = { openapi: "3.0.1", info: { title: "", version: "" }, paths: {} }
+    let current_path = ""
+
+    let data = ""
+    let current_tag = null
+    let current_http_verb = null
+
+    var set_current_tag = function () {
+      //console.log("set_current_tag", current_tag, data)
+      if (current_tag && data != "") {
+        if (current_tag.includes('response')) {
+          const code = current_tag.replace('response_', '')
+          openapi_doc.paths[current_path][current_http_verb].responses[code].content = {}
+          openapi_doc.paths[current_path][current_http_verb].responses[code].content['application/json'] = {}
+          openapi_doc.paths[current_path][current_http_verb].responses[code].content['application/json']['schema'] = { type: "object", properties: {} }
+
+          let properties = {};
+          const json = JSON.parse(data.trim())
+          _.each(_.keys(json), (key) => {
+            properties[key] = json[key]
+          })
+          openapi_doc.paths[current_path][current_http_verb].responses[code].content['application/json']['schema'].properties = properties
+        } else {
+          openapi_doc.paths[current_path][current_http_verb][current_tag] = data.trim();
+        }
+        current_tag = ""
+      }
+      data = ""
+    }
+
+    files.forEach((file) => {
+      const content = fs.readFileSync(file, "utf8");
+      content.split("\n").forEach((line) => {
+        line = line.trim()
+        if (line.startsWith("--")) {
+          line = line.replace("--", "").trim()
+          if (line[0] == "@") {
+            const args = line.split(" ")
+
+            if(args[0] == "@path") {
+              set_current_tag(current_tag, data)
+              current_http_verb = args[1].toLowerCase()
+              current_path = args[2]
+              openapi_doc.paths[args[2]] ||= { [current_http_verb]: { parameters: [], tags: [], responses: {} } }
+            }
+            if (args[0] == "@tag") {
+              set_current_tag(current_tag, data)
+              openapi_doc.paths[current_path][current_http_verb].tags.push(args.slice(1).join(' '))
+            }
+            if(args[0] == "@header") {
+              set_current_tag(current_tag, data)
+              openapi_doc.paths[current_path][current_http_verb].parameters.push({
+                name: args[1],
+                in: 'header',
+                schema: {
+                  type: args[2].replace("*", "").trim(),
+                  example: args.slice(3).join(' ')
+                },
+                required: args[2].includes("*")
+              })
+            }
+            if (args[0] == "@summary") {
+              set_current_tag(current_tag, data)
+              openapi_doc.paths[current_path][current_http_verb].summary = args.slice(1).join(' ')
+            }
+            if (args[0] == "@description") {
+              set_current_tag(current_tag, data)
+              openapi_doc.paths[current_path][current_http_verb].description = args.slice(1).join(' ')
+              current_tag = 'description'
+            }
+            if(args[0] == "@response") {
+              set_current_tag(current_tag, data)
+              openapi_doc.paths[current_path][current_http_verb].responses[args[1]] ||= { description: args.slice(2).join(" ") }
+              current_tag = 'response_' + args[1]
+            }
+            if(args[0] == "@pathParam") {
+              set_current_tag(current_tag, data)
+              openapi_doc.paths[current_path][current_http_verb].parameters.push({
+                name: args[1],
+                in: 'path',
+                schema: {
+                  type: args[2].replace("*", "").trim(),
+                  example: args.slice(3).join(' ')
+                },
+                required: args[2].includes("*")
+              })
+            }
+            if(args[0] == "@queryParam") {
+              set_current_tag(current_tag, data)
+              openapi_doc.paths[current_path][current_http_verb].parameters.push({
+                name: args[1],
+                in: 'query',
+                schema: {
+                  type: args[2].replace("*", "").trim(),
+                  example: args.slice(3).join(' ')
+                },
+                required: args[2].includes("*")
+              })
+            }
+            if(args[0] == "@bodyParam") {
+              console.log("do something with @bodyParam")
+              set_current_tag(current_tag, data)
+            }
+          } else {
+            if(line) data += line + "\n"
+          }
+        }
+      })
+      if (current_tag && data != "") {
+        openapi_doc.paths[current_path][current_tag] = data.trim();
+      }
+      console.log(JSON.stringify(openapi_doc, null, 2))
+    });
   } else {
     execSync("./luaonbeans.org -i beans.lua " + args.join(" "));
   }
