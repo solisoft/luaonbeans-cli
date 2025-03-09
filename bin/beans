@@ -277,6 +277,6 @@ if (argv.w) {
       console.log(JSON.stringify(openapi_doc, null, 2))
     });
   } else {
-    execSync("./luaonbeans.org -i beans.lua " + args.join(" "));
+    execSync("./luaonbeans.org -D . -i beans.lua " + args.join(" "));
   }
 }
