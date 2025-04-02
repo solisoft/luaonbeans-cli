@@ -46,9 +46,50 @@ const run_specs = () => {
   });
 };
 
-if (argv.w) {
+const buildVendorAssets = () => {
+  let vendor_files = findFilesInDir("app", "vendor_src");
+  _.each(vendor_files, async (file) => {
+    console.log(`Processing ${file}`)
+    const file_ext = _.last(file.split("."));
+    const file_dest = "./public/" + file.split("/").splice(-2,1)[0] + "_vendor." + file_ext;
+    let asset_data = [];
+    const content = fs.readFileSync(file, 'utf8');
+    content.split("\n").forEach((line) => {
+      if (line.trim()) {
+        try {
+          const response = execSync(`curl -s "${line.trim()}"`, { encoding: 'utf8' });
+          asset_data.push(response);
+          console.log(`✅ ${line.trim()} fetched ${response.length} bytes`)
+        } catch (error) {
+          console.error(`Error fetching ${line.trim()}: ${error.message}`);
+        }
+      }
+    });
+
+    fs.writeFileSync(file_dest, asset_data.join("\n"));
+    console.log(`✅ ${file_dest} created with ${asset_data.length} assets`)
+  })
+}
+
+const args = process.argv.slice(2);
+
+if (argv.w || args[0] == "dev") {
   // Running specs
   if (argv.t) run_specs();
+
+  const port = argv.p || 8080;
+
+  exec("./luaonbeans.org -D . -s -P luaonbeans.pid -L development.log -p" + port, (error, stdout, stderr) => {
+    if (error) {
+      console.log("Error starting server:".red, error.message);
+      console.log(stdout.toString());
+      console.log(stderr.toString());
+    } else {
+      console.log(stdout.toString());
+    }
+  })
+
+  console.log(`Server started on http://localhost:${port}`.cyan);
 
   // tailwindcss
   console.log("Searching for tailwind css files ...");
@@ -107,9 +148,9 @@ if (argv.w) {
       }
     });
 } else {
-  const args = process.argv.slice(2);
-
-  if (args[0] == "new") {
+  if (args[0] == "build-vendor") {
+    buildVendorAssets()
+  } else if (args[0] == "new") {
     if (args[1] == undefined) {
       console.log("ERROR".red);
       console.log("syntax : beans new myproject".yellow);
@@ -133,14 +174,17 @@ if (argv.w) {
       execSync("cd " + args[1] + " && git init");
     }
   } else if (args[0] == "build") {
+    //buildVendorAssets()
     execSync("cp luaonbeans.org build.org");
     execSync("zip build.org .init.lua");
     execSync("zip -r build.org .lua");
+    execSync("zip -r build.org aqlpages");
     execSync("zip -r build.org app");
     execSync("zip -r build.org public");
     execSync("zip -r build.org specs");
     execSync("zip -r build.org migrations");
     execSync("zip -r build.org config");
+
     console.log("📦 build.org built successfully!");
   } else if (args[0] == "update") {
     console.log("🐳 Updating luaonbeans...");
