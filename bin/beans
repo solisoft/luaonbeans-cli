@@ -102,7 +102,7 @@ if (argv.w || args[0] == "dev") {
     path.splice(-1);
 
     exec(
-      module_bin_folder + "/tailwind -i " +
+      module_bin_folder + "/tailwindcss -i " +
       file +
       " -o public/" +
       _.last(path) +
