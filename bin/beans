@@ -140,8 +140,9 @@ if (argv.w || args[0] == "dev") {
 
   //console.log("Watching folder.", dirname);
   chokidar
-    .watch(dirname, { ignored: /(^|[\/\\])\../ })
+    .watch(dirname + "/app", { ignored: /(^|[\/\\])\../ })
     .on("all", (event, path) => {
+      console.log("event : ", event, path)
       if (event == "change" && path.indexOf("last_modified.txt") < 0 && path.indexOf("development.log") < 0) {
         //console.log("change : ", path.replace(dirname, ""));
         if (argv.t) run_specs();
