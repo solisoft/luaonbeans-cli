@@ -8,6 +8,7 @@ const { argv } = require('node:process');
 var colors = require("colors");
 var _ = require("lodash");
 var chokidar = require("chokidar");
+const WebSocket = require('ws');
 
 var riot = require('@riotjs/compiler')
 
@@ -93,6 +94,29 @@ if (argv.w || args[0] == "dev") {
 
   console.log(`Server started on http://localhost:${port}`.cyan);
 
+  // WebSocket server for live reload
+  const wss = new WebSocket.Server({ port: 8081 });
+  console.log(`WebSocket server started on ws://localhost:8081`.cyan);
+
+  wss.on('connection', (ws) => {
+
+    ws.on('close', () => {
+    });
+
+    ws.on('error', (error) => {
+      console.log('WebSocket error:'.red, error.message);
+    });
+  });
+
+  // Function to broadcast to all connected clients
+  const broadcastToClients = (message) => {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(message));
+      }
+    });
+  };
+
   // tailwindcss
   console.log("Searching for tailwind css files ...");
 
@@ -119,7 +143,6 @@ if (argv.w || args[0] == "dev") {
     .watch(dirname, { ignored: /(^|[\/\\])\../ })
     .on("all", (event, path) => {
       if (event == "change" && path.indexOf("last_modified.txt") < 0 && path.indexOf("development.log") < 0) {
-        fs.writeFileSync("public/last_modified.txt", new Date().toISOString())
         //console.log("change : ", path.replace(dirname, ""));
         if (argv.t) run_specs();
         if(path.indexOf("vendor_src") >= 0) {
@@ -152,6 +175,14 @@ if (argv.w || args[0] == "dev") {
             }
           });
         }
+
+        // Broadcast file change to WebSocket clients
+        broadcastToClients({
+          type: 'file_changed',
+          path: path.replace(dirname, ''),
+          timestamp: new Date().toISOString(),
+          event: event
+        });
       }
     });
 } else {
