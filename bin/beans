@@ -140,6 +140,19 @@ if (argv.w || args[0] == "dev") {
 
   //console.log("Watching folder.", dirname);
   chokidar
+    .watch(dirname + "/public", { ignored: /(^|[\/\\])\../ })
+    .on("all", (event, path) => {
+      if (event == "change" && fs.statSync(path).size > 0) {
+        // Broadcast file change to WebSocket clients
+        broadcastToClients({
+          type: 'file_changed',
+          path: path.replace(dirname, ''),
+          timestamp: new Date().toISOString(),
+          event: event
+        });
+      }
+  });
+  chokidar
     .watch(dirname + "/app", { ignored: /(^|[\/\\])\../ })
     .on("all", (event, path) => {
       if (event == "change" && path.indexOf("last_modified.txt") < 0 && path.indexOf("development.log") < 0) {
