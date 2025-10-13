@@ -79,7 +79,7 @@ if (argv.w || args[0] == "dev") {
 
   const port = argv.p || 8080;
 
-  exec("./luaonbeans.org -D . -s -P luaonbeans.pid -L development.log -p" + port, (error, stdout, stderr) => {
+  exec("./luaonbeans.org -D . -P luaonbeans.pid -L development.log -p" + port, (error, stdout, stderr) => {
     if (error) {
       console.log("Error starting server:".red, error.message);
       console.log(stdout.toString());
@@ -119,6 +119,10 @@ if (argv.w || args[0] == "dev") {
       if (event == "change") {
         //console.log("change : ", path.replace(dirname, ""));
         if (argv.t) run_specs();
+        if(path.indexOf("vendor_src") >= 0) {
+          console.log("rebuilding vendor assets")
+          buildVendorAssets()
+        }
         if (_.last(path.split(".")) == "riot") {
           var currentPath = process.cwd()
 
@@ -174,7 +178,7 @@ if (argv.w || args[0] == "dev") {
       execSync("cd " + args[1] + " && git init");
     }
   } else if (args[0] == "build") {
-    //buildVendorAssets()
+    buildVendorAssets()
     execSync("cp luaonbeans.org build.org");
     execSync("zip build.org .init.lua");
     execSync("zip -r build.org .lua");

@@ -1,6 +1,6 @@
 {
   "name": "luaonbeans-cli",
-  "version": "1.0.29",
+  "version": "1.0.30",
   "description": "beans - Lua On Beans cli",
   "main": "index.js",
   "bin": {
@@ -17,6 +17,6 @@
     "chokidar": "^3.6.0",
     "colors": "^1.4.0",
     "lodash": "^4.17.21",
-    "yargs": "^17.7.2"
+    "yargs": "^18.0.0"
   }
 }
