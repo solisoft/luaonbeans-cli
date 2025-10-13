@@ -1,6 +1,6 @@
 {
   "name": "luaonbeans-cli",
-  "version": "1.0.30",
+  "version": "1.0.33",
   "description": "beans - Lua On Beans cli",
   "main": "index.js",
   "bin": {
@@ -16,7 +16,6 @@
     "@tailwindcss/cli": "^4.1.1",
     "chokidar": "^3.6.0",
     "colors": "^1.4.0",
-    "lodash": "^4.17.21",
-    "yargs": "^18.0.0"
+    "lodash": "^4.17.21"
   }
 }
