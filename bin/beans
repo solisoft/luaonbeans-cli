@@ -82,7 +82,7 @@ if (argv.w || args[0] == "dev") {
 
   const port = argv.p || 8080;
 
-  exec("./luaonbeans.org -D . -P luaonbeans.pid -L development.log -p" + port, (error, stdout, stderr) => {
+  exec("./luaonbeans.org -XD . -P luaonbeans.pid -L development.log -p" + port, (error, stdout, stderr) => {
     if (error) {
       console.log("Error starting server:".red, error.message);
       console.log(stdout.toString());
