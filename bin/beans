@@ -134,7 +134,11 @@ if (argv.w || args[0] == "dev") {
       _.last(path) +
       ".css -w -m -c " +
       path.join("/") +
-      "/tailwind.config.js"
+      "/tailwind.config.js", (err, stdout, stderr) => {
+        if(err) {
+          console.log(err)
+        }
+      }
     );
   });
 
