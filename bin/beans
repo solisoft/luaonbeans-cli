@@ -82,7 +82,7 @@ if (argv.w || args[0] == "dev") {
 
   const port = argv.p || 8080;
 
-  exec("./luaonbeans.org -XD . -P luaonbeans.pid -L development.log -p" + port, (error, stdout, stderr) => {
+  exec("./luaonbeans.org -D . -P luaonbeans.pid -L development.log -p" + port, (error, stdout, stderr) => {
     if (error) {
       console.log("Error starting server:".red, error.message);
       console.log(stdout.toString());
@@ -376,6 +376,6 @@ if (argv.w || args[0] == "dev") {
       console.log(JSON.stringify(openapi_doc, null, 2))
     });
   } else {
-    execSync("./luaonbeans.org -XD . -i beans.lua " + args.join(" "));
+    execSync("./luaonbeans.org -D . -i beans.lua " + args.join(" "));
   }
 }
