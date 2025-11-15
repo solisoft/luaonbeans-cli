@@ -100,8 +100,7 @@ if (argv.w || args[0] == "dev") {
 
   wss.on('connection', (ws) => {
 
-    ws.on('close', () => {
-    });
+    ws.on('close', () => {});
 
     ws.on('error', (error) => {
       console.log('WebSocket error:'.red, error.message);
@@ -144,22 +143,25 @@ if (argv.w || args[0] == "dev") {
 
   //console.log("Watching folder.", dirname);
   chokidar
-    .watch(dirname + "/public", { ignored: /(^|[\/\\])\../ })
-    .on("all", (event, path) => {
-      if (event == "change" && fs.statSync(path).size > 0) {
+    .watch(dirname + "/public/**/*.{css,js}", {})
+    .on("change", (path) => {
+      console.log("change : ", path.replace(dirname, ""));
+      setTimeout(() => {
         // Broadcast file change to WebSocket clients
         broadcastToClients({
           type: 'file_changed',
           path: path.replace(dirname, ''),
           timestamp: new Date().toISOString(),
-          event: event
+          event: "change"
         });
-      }
-  });
+      }, 100);
+    });
+
+
   chokidar
     .watch(dirname + "/app", { ignored: /(^|[\/\\])\../ })
-    .on("all", (event, path) => {
-      if (event == "change" && path.indexOf("last_modified.txt") < 0 && path.indexOf("development.log") < 0) {
+    .on("change", (path) => {
+      if (path.indexOf("last_modified.txt") < 0 && path.indexOf("development.log") < 0) {
         //console.log("change : ", path.replace(dirname, ""));
         if (argv.t) run_specs();
         if(path.indexOf("vendor_src") >= 0) {
@@ -198,10 +200,11 @@ if (argv.w || args[0] == "dev") {
           type: 'file_changed',
           path: path.replace(dirname, ''),
           timestamp: new Date().toISOString(),
-          event: event
+          event: "change"
         });
       }
     });
+
 } else {
   if (args[0] == "build-vendor") {
     buildVendorAssets()
